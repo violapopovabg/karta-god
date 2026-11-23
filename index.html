@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Карта года Виолетты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Средиземноморская палитра: прохладный светлый фон, морская бирюза — акцент, абрикос — прогресс.
+     Layout: шапка с видением, вкладки, рабочие сетки карточек. Год = 4 цикла по 12 недель + 13-я неделя. */
+  --bg:#f3f6f7; --surface:#ffffff; --ink:#15303a; --muted:#5a6e76; --line:#dbe3e6;
+  --accent:#1d7487; --accent-soft:#e1eff2; --warm:#c96a30; --warm-soft:#fbeadf;
+  --good:#2f8a5b; --good-soft:#e2f2e9; --mid:#9fcdb4; --low:#d7e9df;
+  --s-health:#2f8a5b; --s-body:#c96a30; --s-disc:#15303a; --s-lang:#1d7487;
+  --s-career:#7b4fa3; --s-money:#a87d0f; --s-travel:#2b6cb0; --s-growth:#a34f6c;
+  --display:"Unbounded","Onest",system-ui,sans-serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e191e; --surface:#15242b; --ink:#e4edef; --muted:#90a5ad; --line:#243840;
+    --accent:#5bb6c8; --accent-soft:#18343c; --warm:#f0a46e; --warm-soft:#3a2a1f;
+    --good:#5cc08a; --good-soft:#173328; --mid:#2f6b4d; --low:#1d3a2d;
+    --s-health:#5cc08a; --s-body:#f0a46e; --s-disc:#cfdde1; --s-lang:#5bb6c8;
+    --s-career:#b48ddb; --s-money:#e0b84a; --s-travel:#6fa8e8; --s-growth:#e08aa8;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e191e; --surface:#15242b; --ink:#e4edef; --muted:#90a5ad; --line:#243840;
+  --accent:#5bb6c8; --accent-soft:#18343c; --warm:#f0a46e; --warm-soft:#3a2a1f;
+  --good:#5cc08a; --good-soft:#173328; --mid:#2f6b4d; --low:#1d3a2d;
+  --s-health:#5cc08a; --s-body:#f0a46e; --s-disc:#cfdde1; --s-lang:#5bb6c8;
+  --s-career:#b48ddb; --s-money:#e0b84a; --s-travel:#6fa8e8; --s-growth:#e08aa8;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+h1,h2,h3{font-family:var(--display);font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.01em}
+h2{font-size:1.02rem}
+h3{font-size:.9rem}
+p{margin:6px 0 0}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.words{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.word{font-family:var(--display);font-size:.78rem;padding:5px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.status{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.status.ok i{background:var(--good)} .status.bad i{background:var(--warm)}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px;overflow-x:auto}
+nav.tabs button{font:inherit;font-weight:600;font-size:.95rem;background:none;border:0;color:var(--muted);padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,[role="checkbox"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;gap:18px}
+.two{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.half{grid-template-columns:repeat(2,minmax(0,1fr))}
+.three-col{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:860px){.two,.half,.three-col{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.stack{display:grid;gap:18px;align-content:start}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.daynav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.daynav .date{font-family:var(--display);font-size:1.02rem;min-width:12ch}
+.btn{font:inherit;font-size:.9rem;font-weight:500;background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.icon{width:36px;padding:6px 0;text-align:center}
+.stage{display:flex;gap:14px;align-items:flex-start;padding:14px;border-radius:12px;background:var(--accent-soft);margin-bottom:16px}
+.stage .num{font-family:var(--display);font-size:1.3rem;color:var(--accent);line-height:1.1;white-space:nowrap}
+.stage b{display:block}
+.banner{padding:12px 14px;border-radius:10px;background:var(--warm-soft);margin-bottom:14px;font-size:.92rem}
+.list{display:grid;gap:8px}
+.habit{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;cursor:pointer;user-select:none;background:var(--surface)}
+.habit:hover{border-color:var(--accent)}
+.box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:background .15s}
+[aria-checked="true"] > .box{background:var(--good);border-color:var(--good)}
+[aria-checked="true"] > .box::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.habit[aria-checked="true"]{background:var(--good-soft);border-color:transparent}
+.habit .txt{flex:1}
+.tag{font-size:.72rem;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.row-flex{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+textarea{width:100%;min-height:74px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical}
+label.lbl{display:block;font-size:.85rem;color:var(--muted);margin:14px 0 6px}
+.big{font-family:var(--display);font-size:2.5rem;line-height:1;font-variant-numeric:tabular-nums}
+.mid-num{font-family:var(--display);font-size:1.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.kpi{display:flex;align-items:baseline;gap:8px;margin:6px 0 10px;flex-wrap:wrap}
+.of{color:var(--muted);font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:999px}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warm-soft);color:var(--warm)}
+.pill.neutral{background:var(--accent-soft);color:var(--accent)}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.heat .hd{font-size:.7rem;color:var(--muted);text-align:center}
+.heat button{position:relative;aspect-ratio:1;border:0;border-radius:7px;font:inherit;font-size:.75rem;color:var(--ink);background:var(--bg);cursor:pointer;font-variant-numeric:tabular-nums}
+.heat button.l1{background:var(--low)} .heat button.l2{background:var(--mid)} .heat button.l3{background:var(--good);color:#fff}
+.heat button.fut{opacity:.45}
+.heat button.sel{outline:2px solid var(--accent);outline-offset:1px}
+.heat .cyc{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--s-growth)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 0;font-size:.8rem;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.bar{height:8px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.bar > span{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.good > span{background:var(--good)}
+.bar.warm > span{background:var(--warm)}
+.srow{display:grid;grid-template-columns:76px 1fr 42px;gap:8px;align-items:center;font-size:.8rem;font-variant-numeric:tabular-nums}
+.srow.cur{font-weight:700}
+.rules{margin:8px 0 0;padding-left:18px;font-size:.9rem}
+.rules li{margin:5px 0}
+.tk{display:flex;gap:10px;align-items:flex-start;padding:7px 6px;border-radius:8px;cursor:pointer;font-size:.9rem}
+.tk:hover{background:var(--bg)}
+.tk .box{width:18px;height:18px;border-radius:5px;margin-top:2px}
+.tk[aria-checked="true"] > .box::after{width:4px;height:8px}
+.tk[aria-checked="true"] .t{color:var(--muted);text-decoration:line-through}
+.tk .dot{margin-top:7px}
+.g-badge{font-family:var(--display);font-size:.65rem;padding:2px 6px;border-radius:6px;background:var(--accent-soft);color:var(--accent);flex:none;margin-top:2px}
+.g-badge.g0{background:var(--bg);color:var(--muted)}
+.goalcard{border-left:4px solid var(--accent)}
+.phase{display:flex;gap:6px;margin-top:10px}
+.phase span{flex:1;height:6px;border-radius:99px;background:var(--line)}
+.phase span.on{background:var(--warm)}
+.weeks{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.wk{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.wk.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.wk header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.wk header small{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.cycles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:22px}
+@media (max-width:900px){.cycles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cyc-card{padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.cyc-card.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.cyc-card .d{font-size:.75rem;color:var(--muted)}
+.cyc-card b{display:block;margin:2px 0 4px}
+.cyc-card ul{margin:0;padding-left:16px;font-size:.8rem;color:var(--muted)}
+.months{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.month{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.month.now{border-color:var(--accent)}
+.month header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.month header small{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.ev{font-size:.78rem;color:var(--warm);font-weight:600;margin:-4px 0 6px}
+.stepper{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+input[type="number"]{font:inherit;width:130px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+.rows{display:grid;gap:10px;margin-top:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-size:.88rem}
+.row .bar{grid-column:1 / -1}
+.inc{display:grid;grid-template-columns:72px 1fr 110px;gap:8px;align-items:center;font-size:.82rem;font-variant-numeric:tabular-nums}
+.inc input{width:100%}
+.checks{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.goals{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.dayline{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:10px}
+.dayline li{display:grid;grid-template-columns:70px 1fr;gap:10px;font-size:.95rem}
+.dayline time{font-family:var(--display);font-size:.75rem;color:var(--accent);padding-top:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);font-size:.88rem;background:var(--bg)}
+.three{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.three span{font-family:var(--display);font-size:1.4rem;color:var(--accent)}
+.wheel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:600px){.wheel{grid-template-columns:1fr}}
+.wheel svg{width:100%;max-width:320px;height:auto;display:block;margin:0 auto}
+.wrow{display:grid;grid-template-columns:1fr 90px 22px;gap:8px;align-items:center;font-size:.82rem}
+.wrow b{font-variant-numeric:tabular-nums;text-align:right}
+.levels{display:grid;gap:12px;margin-top:10px}
+.lvl{padding:12px;border-radius:10px;background:var(--bg)}
+.lvl b{font-family:var(--display);font-size:.78rem;color:var(--accent);display:block;margin-bottom:4px;font-weight:500}
+.mw{overflow-x:auto;padding:12px}
+.mw-row{display:grid;grid-template-columns:52px repeat(7,minmax(92px,1fr));gap:4px;min-width:720px;margin-bottom:4px}
+.mw-head span{font-size:.75rem;color:var(--muted);text-align:center;font-weight:600}
+.mw-t{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:4px}
+.mw-c{font-size:.7rem;line-height:1.25;padding:5px 6px;border-radius:6px;background:var(--bg);border:1px solid var(--line)}
+.mw-c.s{background:var(--accent-soft);border-color:var(--accent)}
+.mw-c.f{background:var(--good-soft);border-color:var(--good)}
+.mw-c.b{background:var(--warm-soft);border-color:transparent}
+.wh{overflow-x:auto;margin-top:8px}
+.wh-row{display:grid;gap:4px;margin-bottom:4px;align-items:center;width:max-content}
+.wh-l{font-size:.8rem}
+.wh-h{font-size:.72rem;color:var(--muted);text-align:center;text-transform:capitalize}
+.wh-c{display:block;text-align:center;font-size:.78rem;font-variant-numeric:tabular-nums;border-radius:6px;padding:4px 0;border:1px solid var(--line)}
+a{color:var(--accent)}
+[hidden]{display:none !important}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Карта года Виолетты</h1>
+      <div class="muted small">23 ноября 2026 — 21 ноября 2027 · 4 цикла «12 недель в году»</div>
+      <div class="words"><span class="word">самодостаточная</span><span class="word">здоровая</span><span class="word">красивая</span></div>
+    </div>
+    <div class="status" id="status"><i></i><span>Загружаю…</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="today" aria-selected="true">Сегодня</button>
+    <button role="tab" data-tab="cycle" aria-selected="false">12 недель</button>
+    <button role="tab" data-tab="year" aria-selected="false">Год</button>
+    <button role="tab" data-tab="goals" aria-selected="false">Цели и деньги</button>
+    <button role="tab" data-tab="vision" aria-selected="false">Видение</button>
+  </nav>
+
+  <section id="tab-today"></section>
+  <section id="tab-cycle" hidden></section>
+  <section id="tab-year" hidden></section>
+  <section id="tab-goals" hidden></section>
+  <section id="tab-vision" hidden></section>
+</div>
+
+<script>
+/* ================= ДАННЫЕ ПЛАНА ================= */
+const START = "2026-11-23";
+const SPHERES = {
+  health:{n:"Здоровье",c:"var(--s-health)"}, body:{n:"Тело и внешность",c:"var(--s-body)"},
+  disc:{n:"Дисциплина",c:"var(--s-disc)"}, lang:{n:"Языки",c:"var(--s-lang)"},
+  career:{n:"Карьера и блог",c:"var(--s-career)"}, money:{n:"Деньги",c:"var(--s-money)"},
+  travel:{n:"Путешествия",c:"var(--s-travel)"}, growth:{n:"Обучение",c:"var(--s-growth)"}
+};
+/* Ежедневные тактики (повторяющиеся действия). Вводятся постепенно. */
+const HABITS = [
+  {id:"plan5", t:"Утро, 5 минут: перечитать видение и план недели", s:"disc", from:"2026-11-23"},
+  {id:"wake",  t:"Подъём около 6:00 и дневной свет",          s:"disc",   from:"2026-11-23"},
+  {id:"phone", t:"Телефон вне спальни с 20:30",                s:"disc",   from:"2026-11-23"},
+  {id:"move",  t:"Спорт или движение, любой вид",              s:"body",   from:"2026-11-23"},
+  {id:"en",    t:"Английский 40 минут самостоятельно", s:"lang",   from:"2026-11-23"},
+  {id:"buffer",t:"Буферный блок: сообщения и мелочи разом, 30 мин", s:"disc", from:"2026-11-23"},
+  {id:"lunch", t:"Еда по расписанию и нормальный обед",        s:"health", from:"2026-12-14"},
+  {id:"coffee",t:"Кофе и чай отдельно от еды",                 s:"health", from:"2026-12-14"},
+  {id:"care",  t:"Вечерний уход: кожа и фейсбилдинг",          s:"body",   from:"2026-12-14"},
+  {id:"scroll",t:"Соцсети для себя меньше 1,5 часа",           s:"disc",   from:"2026-12-14"},
+  {id:"career",t:"Одно действие по карьере или блогу",         s:"career", from:"2027-01-18"},
+  {id:"read",  t:"Чтение 15 минут",                            s:"growth", from:"2027-01-18"},
+  {id:"diction",t:"Дикция 5 минут",                            s:"lang",   from:"2027-03-01"},
+  {id:"es",    t:"Испанский 10 минут",                         s:"lang",   from:"2027-06-01"}
+];
+/* 4 цикла: 12 рабочих недель + 13-я неделя (отдых, итоги, план следующего цикла) */
+const CYCLES = [
+  {n:1,from:"2026-11-23",title:"Фундамент",
+   goals:[
+    {g:1,s:"health",t:"Здоровье и режим",d:"Выполнение 85%+ в 9 из 12 недель, 30 тренировок, железо под контролем врача."},
+    {g:2,s:"career",t:"Карьера и блог",d:"Портфолио и оффер готовы, Instagram-блог запущен, 30 сообщений потенциальным клиентам, есть второй проект."},
+    {g:3,s:"lang",t:"Английский",d:"Практика каждый день; к 14 февраля — 30 минут разговора о своей работе."}]},
+  {n:2,from:"2027-02-22",title:"Клиенты",
+   goals:[
+    {g:1,s:"money",t:"Доход 100 тыс. ₽",d:"Два проекта (40 + 60 тыс. ₽), камера куплена."},
+    {g:2,s:"career",t:"Блог и навыки",d:"1 000+ подписчиков, 2 поста в неделю, курс Premiere Pro, портфолио монтажёра и 3 реалистичных AI-креатива."},
+    {g:3,s:"health",t:"Здоровье и тело",d:"Плановые врачи пройдены, 36 тренировок, английский B1 (тест)."}]},
+  {n:3,from:"2027-05-24",title:"Лето",
+   goals:[
+    {g:1,s:"body",t:"Тело к лету",d:"Подтянутые бёдра, ровная спина, 36 тренировок, фото прогресса."},
+    {g:2,s:"career",t:"Продукт и 3 000 подписчиков",d:"Первый продукт блога запущен, After Effects: основы."},
+    {g:3,s:"lang",t:"Испанский с нуля",d:"10 минут в день; поездки в Грецию и Испанию."}]},
+  {n:4,from:"2027-08-23",title:"Масштаб",
+   goals:[
+    {g:1,s:"money",t:"Доход 150 тыс. ₽",d:"4 проекта + доход от блога."},
+    {g:2,s:"career",t:"10 000 подписчиков",d:"Первое сотрудничество с брендом, курс по маркетингу и брендингу."},
+    {g:3,s:"lang",t:"Языки и речь",d:"30 минут разговора на английском, испанский A1–A2, курс ораторского мастерства."}]}
+];
+/* Тактики цикла 1 по неделям: [id, номер цели (0 — общее), текст] */
+const TACTICS1 = {
+  1:[["a","0","Заполнить колесо баланса и подписать обещание себе"],["b","1","Записаться к врачу, сдать анализ на ферритин"],["c","2","Зафиксировать стартовую статистику Ольги (скриншоты)"],["d","2","Разобрать 15 аккаунтов артистов"],["e","3","Составить свою программу английского на 40 минут в день: YouTube-каналы, грамматика, практика речи"]],
+  2:[["a","1","Невролог или ортопед: согласовать тренировки и ЛФК"],["b","2","Ещё 15 аккаунтов → документ «Что работает у артистов»"],["c","2","Оформить Instagram, первый пост «Начинаю 12 недель»"]],
+  3:[["a","1","Выбрать программу ЛФК и домашних тренировок"],["b","2","Собрать портфолио: Ольга, меню, таргет"],["c","2","Сформулировать оффер и цену"]],
+  4:[["a","2","Список 20 потенциальных клиентов (через Ивана и Ольгу)"],["b","2","Попросить у Ольги отзыв"],["c","2","1 пост в блог"],["d","1","Начать вечерний ритуал ухода"]],
+  5:[["a","2","Отправить 10 персональных сообщений певицам"],["b","2","1 пост в блог"]],
+  6:[["a","2","Ответить на отклики"],["b","2","Пост «Итоги 6 недель»"],["c","1","Фото прогресса №1"]],
+  7:[["a","2","Ещё 10 сообщений артистам и брендам"],["b","1","Записаться к дерматологу"],["c","2","Блог: 2 поста на этой неделе"]],
+  8:[["a","2","Созвоны с откликнувшимися"],["b","2","Предложить Ивану вести его соцсети как второй кейс"],["c","2","AI-креатив: сгенерировать первый реалистичный рекламный кадр для портфолио"]],
+  9:[["a","2","Мини-концепт для 1 молодого бренда, отправить"],["b","2","Начать бесплатный курс по видеосъёмке и свету"],["c","3","Записать 1-минутное видео на английском для блога"]],
+  10:[["a","2","Ещё 10 сообщений"],["b","1","Фото прогресса №2"],["c","2","AI-креатив: реалистичный рекламный ролик на 10–15 секунд для портфолио"]],
+  11:[["a","2","Закрыть второй проект: договор, цена, старт"],["b","1","Повторный анализ, если назначил врач"]],
+  12:[["a","2","Оформить новый кейс в портфолио"],["b","2","Пост «Итоги 12 недель»"],["c","3","Проверка: 30 минут разговора о работе на английском"]]
+};
+/* Тактики, которые повторяются каждую неделю любого цикла (блоки времени и подотчётность) */
+const WEEKLY = [
+  ["review","0","Итоги и план недели, 15–20 минут: оценить прошлую неделю, перенести тактики на эту"],
+  ["strat","0","Стратегический блок: 3 часа глубокой работы без телефона, в начале недели"],
+  ["free","0","Свободный блок: 3 часа отдыха без задач и без чувства вины"],
+  ["wam","0","Встреча подотчётности, 15–30 минут: с группой поддержки (Иван, подруга) или с Claude"],
+  ["gym","1","Провести 3 тренировки (отмечается само по вкладке «Сегодня»)"]
+];
+const AUTO = { gym: (c,w) => weekWorkouts(weekStart(c,w)) >= 3 };
+const WEEK13 = [
+  ["r0","0","Дожать цель цикла, если она ещё не достигнута"],
+  ["r1","0","Подсчитать результаты цикла: оценки недель и показатели целей"],
+  ["r2","0","Отпраздновать: что получилось, чем горжусь"],
+  ["r3","0","Заново заполнить колесо баланса и перечитать видение"],
+  ["r4","0","С Claude: цели, тактики и обещания следующего цикла"]
+];
+/* Эмоциональный цикл перемен (Келли — Коннор). Привязка к неделям примерная. */
+const PHASES = [
+  {w:[1,2],n:"Необоснованный оптимизм",d:"Всё вдохновляет, цена перемен ещё не видна. Используй энергию, чтобы заложить привычки."},
+  {w:[3,4],n:"Информированный пессимизм",d:"Цена стала видна, выгоды кажутся далёкими, хочется искать оправдания. Это ожидаемо: держись за минимум."},
+  {w:[5,6],n:"Момент отчаяния",d:"Здесь сдаётся большинство. Перечитай видение и обещание себе, расскажи группе поддержки. Не пропускай дважды."},
+  {w:[7,9],n:"Информированный оптимизм",d:"Появились первые результаты, действия стали привычными. Главное — не останавливаться."},
+  {w:[10,12],n:"Успех и самореализация",d:"Новые действия даются легко. Финишная прямая: дожимай незакрытые тактики."},
+  {w:[13,13],n:"Неделя 13",d:"Дожать цель, подвести итоги, отпраздновать и спланировать следующий цикл."}
+];
+/* Три периода по 4 недели и напоминания в ключевые недели цикла */
+const PERIODS = [
+  {w:[1,4],n:"Первые 4 недели: погружение",d:"Ни одной недели без плана, оценка с 2-й недели, встречи подотчётности. Цель — привычка работать по системе."},
+  {w:[5,8],n:"Вторые 4 недели: новизна уходит",d:"Оценка должна подбираться к 85%. Если не растёт — ищи ошибку: в плане или в выполнении."},
+  {w:[9,12],n:"Последние 4 недели: финиш",d:"Каждая неделя на счету. Что можно сделать на этой неделе, чтобы закрыть цель?"},
+  {w:[13,13],n:"Неделя 13",d:"Итоги, праздник и план следующего цикла."}
+];
+const NUDGES = {
+  2:"Неделя 2. Сама оценка первой недели не так важна — важно, что ты нашла время её посчитать и составить план. Спроси себя: каких успехов я добилась и как могу действовать эффективнее?",
+  3:"Неделя 3. Если что-то не получилось или план недели не составлен — решающий момент сейчас. Перечитай видение, составь план и начни сегодня.",
+  5:"Неделя 5. До конца цикла 7 недель. Разница между хорошим и великим — неделя за неделей выполнять 85%. Что изменилось бы, если бы последние недели были на 85%?",
+  8:"Неделя 8. Неприятное чувство, когда не делаешь нужное, — это продуктивное напряжение. Не прячься от него (не откладывай оценку «на потом»), а используй как толчок к действию.",
+  11:"Неделя 11. Осталось меньше двух недель. Никаких «на следующей неделе». Что ты можешь сделать на этой неделе? А сегодня? Закончи цикл сильно."
+};
+/* Образец недели (черновик — подстроим под твоё время пиковой энергии) */
+const MODEL_DAYS = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+const MODEL = [
+  ["6:00","Подъём, свет, 5 минут на видение и план","*"],
+  ["6:30","Движение или тренировка","*"],
+  ["8:00","Итоги и план недели + встреча подотчётности","Пн"],
+  ["9:00","Стратегический блок, 3 часа без телефона","Вт"],
+  ["9:00","Работа над проектами (Ольга и карьера)","Пн,Ср,Чт,Пт"],
+  ["11:00","Буферный блок: сообщения и мелочи, 30 минут","Пн,Вт,Ср,Чт,Пт"],
+  ["13:00","Нормальный обед","*"],
+  ["14:00","Свободный блок, 3 часа: отдых без задач","Сб"],
+  ["16:30","Буферный блок, 30 минут","Пн,Вт,Ср,Чт,Пт"],
+  ["19:00","Английский, 40 минут","*"],
+  ["20:00","Экраны прочь, вечерний уход, оценка дня","*"],
+  ["20:45","Сон","*"]
+];
+const MONTHS = [
+  {k:"2026-12",n:"Декабрь 2026",m:[
+    ["d0","health","Чекап на диспансеризации и офтальмолог (уже сделано)"],
+    ["d1","health","Врач и анализы на железо (ферритин), закрыть дефициты"],
+    ["d2","health","Невролог или ортопед: согласовать тренировки и ЛФК"],
+    ["d4","career","Зафиксировать стартовую статистику Ольги"],
+    ["d5","career","Документ «Что работает у артистов»"],
+    ["d6","money","Начать откладывать 10–20 тыс. ₽ в месяц"]]},
+  {k:"2027-01",n:"Январь",m:[
+    ["j1","health","Дерматолог: кожа и синяки под глазами"],
+    ["j2","career","Портфолио: Ольга, меню, таргет. Оффер и цена"],
+    ["j3","career","Блог в Instagram запущен"],
+    ["j4","growth","AI-реклама: выбрать нейросети для фото и видео, освоить основы промптов"]]},
+  {k:"2027-02",n:"Февраль",ev:"14 февраля — конец цикла 1, 15–21 — неделя 13",m:[
+    ["f2","career","Второй проект"],
+    ["f4","lang","30 минут разговора на английском"],
+    ["f5","growth","Видеосъёмка: курс по съёмке и свету"],
+    ["f6","career","AI-реклама: первые реалистичные креативы в портфолио"]]},
+  {k:"2027-03",n:"Март",m:[
+    ["m2","health","Трихолог, ревакцинация"],
+    ["m3","career","Блог: 2 поста в неделю, Telegram и ВК для сопровождения"],
+    ["m4","career","1 000 подписчиков"],
+    ["m5","lang","Старт дикции, 5 минут в день"],
+    ["m6","growth","Монтаж: базовый курс Premiere Pro"],
+    ["m7","body","Личный стиль: разбор гардероба, образы"]]},
+  {k:"2027-04",n:"Апрель",m:[
+    ["a2","health","Эндокринолог, уролог"],
+    ["a3","growth","Бесплатное повышение квалификации: маркетинг и брендинг"],
+    ["a4","body","Фото прогресса №2"],
+    ["a5","career","AI-реклама: концепт реалистичной рекламы для артиста или бренда"]]},
+  {k:"2027-05",n:"Май",ev:"15 мая — день рождения · 17–23 мая — неделя 13",m:[
+    ["y1","money","Доход 100 тыс. ₽ в месяц"],
+    ["m1","money","Камера, 60 тыс. ₽"],
+    ["y2","lang","Тест английского: уровень B1"],
+    ["y3","career","Идея первого продукта, проверка на аудитории"],
+    ["y4","career","Портфолио монтажёра: 5 лучших роликов"]]},
+  {k:"2027-06",n:"Июнь",m:[
+    ["u1","body","Тело к лету: подтянутые бёдра, ровная спина"],
+    ["u2","lang","Старт испанского с нуля"],
+    ["u3","travel","На машине: Болгария → Греция"],
+    ["u4","career","3 000 подписчиков"],
+    ["u5","growth","After Effects: основы"],
+    ["u6","career","AI-реклама: серия из 3 роликов, пост-разбор в блоге"]]},
+  {k:"2027-07",n:"Июль",m:[
+    ["l1","travel","Испания: Валенсия и Барселона"],
+    ["l2","money","Накопления на поездки"],
+    ["l4","career","Третий проект"],
+    ["l3","body","Фото прогресса №3"]]},
+  {k:"2027-08",n:"Август",ev:"16–22 августа — неделя 13",m:[
+    ["g1","career","Запуск первого продукта"],
+    ["g3","growth","Прочитано 6 книг"]]},
+  {k:"2027-09",n:"Сентябрь",m:[
+    ["s1","health","Ортодонт: бесплатная консультация и план лечения на 2028 год"],
+    ["s3","career","5 000 подписчиков"],
+    ["s4","growth","Курс по маркетингу и брендингу"]]},
+  {k:"2027-10",n:"Октябрь",m:[
+    ["o1","travel","Брюссель и Нидерланды, к брату"],
+    ["o2","lang","Испанский: разговорный уровень A1–A2"],
+    ["o3","career","Первое сотрудничество с брендом"],
+    ["o6","career","Четвёртый проект"],
+    ["o7","career","Предложить бренду реалистичную AI-рекламу как услугу"],
+    ["o4","lang","Ораторское мастерство: курс"],
+    ["o5","money","Начать копить на права"]]},
+  {k:"2027-11",n:"Ноябрь 2027",ev:"15–21 ноября — итоги года",m:[
+    ["n1","money","Доход 150 тыс. ₽ в месяц"],
+    ["n2","career","4 проекта и 10 000 подписчиков"],
+    ["n3","body","150 тренировок"],
+    ["n4","growth","10 книг"],
+    ["n5","disc","Итоги года: самодостаточная, здоровая, красивая"]]}
+];
+/* Мои цели по сферам — формулировки Виолетты */
+const MY_GOALS = [
+  {n:"Образ жизни",s:"disc",items:[
+    ["l1","Дисциплина: планирование и новые привычки (спорт, чтение, языки)","12 недель · ежедневные тактики"],
+    ["l2","Внешний вид: ухоженность в фигуре, коже, волосах и стиле","Тело, уход, трихолог, стиль — март"],
+    ["l3","Речь: пройти обучение ораторскому мастерству","Дикция с марта · курс — октябрь"],
+    ["l4","Окружение: успешное, доброе, честное — чтобы отражало качества, которые я в себе воспитываю","10 знакомств в месяц"],
+    ["l5","Ввести в жизнь регулярный спорт и тренировки","150 тренировок за год"]]},
+  {n:"Имидж",s:"body",items:[
+    ["i1","Имидж прогрессивного человека: нон-стоп развитие","Обучение по месяцам"],
+    ["i2","Развить личный стиль в одежде: ещё больше аутентичности через одежду","Март · разбор гардероба"],
+    ["i3","Больше знакомств в сфере и не только: 10 знакомств в месяц в сфере","Счётчик ниже"],
+    ["i4","Физическая внешность: тонус, тело, осанка, без отёков — здоровое тело, здоровая внешность, здоровые волосы","ЛФК, сон, вода, трихолог"]]},
+  {n:"Обучение",s:"growth",items:[
+    ["e1","Маркетинг и брендинг (книги, курсы): бесплатное повышение квалификации и 1 курс","Апрель и сентябрь"],
+    ["e2","Видеосъёмка: съёмка, работа со светом, программы","Февраль"],
+    ["e3","Монтаж: Premiere Pro, After Effects, основные нейросети","Январь, март, июнь"],
+    ["e5","Нейросети для креатива: реалистичная AI-реклама (фото и видео) как отдельная услуга и часть портфолио","Январь — основы, февраль — первые креативы, июнь — серия роликов, октябрь — предложить бренду"],
+    ["e4","Английский и испанский: начать изучать, дойти до разговорного A2 за год","Английский — каждый день · испанский — с июня"]]},
+  {n:"Карьера",s:"career",items:[
+    ["k1","Личный бренд маркетолога и монтажёра в медиа","Блог с января"],
+    ["k2","100 000 подписчиков в Instagram и сотрудничество с брендами","10 000 к ноябрю 2027 · бренд — октябрь"],
+    ["k3","Маркетинг и контент-продюсирование: вырасти в квалификации","Курсы и практика"],
+    ["k4","Видеомонтаж: старт в карьере, портфолио","Портфолио монтажёра — май"],
+    ["k5","Классный проект (или проекты): доход, перспектива роста, личный интерес и вдохновение, онлайн-формат","4 проекта к ноябрю 2027: 2-й — февраль, 3-й — июль, 4-й — октябрь"],
+    ["k6","Статус квалифицированного и талантливого специалиста креативной сферы — осознание для себя","Итоги года"]]},
+  {n:"Здоровье",s:"health",items:[
+    ["h1","Пройти чекап организма на диспансеризации и самостоятельные анализы","Сделано"],
+    ["h2","Исследование у офтальмолога по поводу макулы","Сделано"],
+    ["h3","Ревакцинация","Март"],
+    ["h4","Регулярный спорт каждый день: разные виды, главное — регулярность","Ежедневная тактика"],
+    ["h5","Дисциплина дня: единое время сна и единое время питания","Подъём 6:00, отбой, еда по расписанию"],
+    ["h6","Закрыть дефициты организма","Врач по железу — декабрь"],
+    ["h7","Как итог: стабильно хорошее состояние и здоровье, меньше заболеваний, крепкий иммунитет","Итоги года"]]}
+];
+const INCOME_TARGET = {"2026-12":75000,"2027-01":80000,"2027-02":85000,"2027-03":90000,"2027-04":95000,"2027-05":100000,"2027-06":108000,"2027-07":116000,"2027-08":125000,"2027-09":133000,"2027-10":141000,"2027-11":150000};
+const MONTH_SHORT = {"2026-12":"дек","2027-01":"янв","2027-02":"фев","2027-03":"мар","2027-04":"апр","2027-05":"май","2027-06":"июн","2027-07":"июл","2027-08":"авг","2027-09":"сен","2027-10":"окт","2027-11":"ноя"};
+const SAVINGS = [
+  {id:"camera",n:"Камера",target:60000,when:"май"},
+  {id:"travel",n:"Путешествия",target:200000,when:"июль"},
+  {id:"ortho",n:"Ортодонт",target:300000,when:"2028, 300–500 тыс."},
+  {id:"license",n:"Права",target:100000,when:"2028"},
+  {id:"flat",n:"Квартира",target:2000000,when:"3–5 лет"}
+];
+const WHEEL = [["health","Здоровье"],["body","Тело и внешность"],["career","Карьера"],["money","Деньги"],["learn","Языки и обучение"],["people","Окружение и близкие"],["rest","Отдых и путешествия"],["order","Дисциплина и порядок"]];
+
+/* ================= ДАТЫ ================= */
+const pad = n => String(n).padStart(2,"0");
+const iso = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (s,n) => { const d=parse(s); d.setDate(d.getDate()+n); return iso(d); };
+const mondayOf = s => { const d=parse(s); d.setDate(d.getDate()-((d.getDay()+6)%7)); return iso(d); };
+const diffDays = (a,b) => Math.round((parse(b)-parse(a))/864e5);
+const TODAY = iso(new Date());
+const fmtDate = s => parse(s).toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"});
+const fmtShort = s => parse(s).toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+const rub = n => Math.round(n).toLocaleString("ru-RU")+" ₽";
+let sel = TODAY < START ? START : TODAY;
+/* позиция даты: цикл 1–4 и неделя 1–13 */
+function pos(d){
+  const days = diffDays(START, d); if (days < 0) return null;
+  const c = Math.floor(days/91); if (c > 3) return null;
+  return {c:c+1, w:Math.floor((days%91)/7)+1};
+}
+const weekStart = (c,w) => addDays(CYCLES[c-1].from, (w-1)*7);
+function tacticsFor(c,w){
+  if (w===13) return WEEK13.map(([k,g,t]) => ({id:`c${c}w13-${k}`,g,t}));
+  const own = (c===1 && TACTICS1[w]) ? TACTICS1[w].map(([k,g,t]) => ({id:`c1w${w}-${k}`,g,t})) : [];
+  return own.concat(WEEKLY.map(([k,g,t]) => ({id:`c${c}w${w}-${k}`,g,t,auto:AUTO[k]?()=>AUTO[k](c,w):null})));
+}
+const isDone = t => t.auto ? t.auto() : !!state.tactics[t.id];
+function weekWorkouts(mon){ let n=0; for (let i=0;i<7;i++){ const r=state.days[addDays(mon,i)]; if (r&&r.w) n++; } return n; }
+
+/* ================= СОСТОЯНИЕ И СОХРАНЕНИЕ ================= */
+const blank = () => ({days:{},done:{d0:true},tactics:{},books:0,projects:1,subs:0,msgs:0,income:{},savings:{},net:{},myg:{h1:true,h2:true},wheel:{},wheelHist:{},commit:{},weeks:{},goals:{},vision:{}});
+let state = blank();
+let docRef = null, saveTimer = null, chain = Promise.resolve();
+const merge = o => { const st = Object.assign(blank(), o||{}); if (st.wheel && Object.keys(st.wheel).length && !Object.keys(st.wheelHist||{}).length){ st.wheelHist = {"2026-11": st.wheel}; } return st; };
+try { const s = localStorage.getItem("violetta-year"); if (s) state = merge(JSON.parse(s)); } catch(e) {}
+function saveLocal(){ try { localStorage.setItem("violetta-year", JSON.stringify(state)); } catch(e) {} }
+function setStatus(kind, text){ const el=document.getElementById("status"); el.className="status "+(kind||""); el.querySelector("span").textContent=text; }
+function save(){
+  saveLocal(); clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (!docRef) return;
+    const body = JSON.parse(JSON.stringify(state));
+    chain = chain.then(() => docRef.set(body))
+      .then(() => setStatus("ok","Сохранено"))
+      .catch(err => setStatus("bad", err && err.code==="invalid_argument" ? "Нет прав на запись" : "Не сохранилось, попробуй ещё раз"));
+  }, 700);
+}
+(async () => {
+  let db = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch(e) { db = null; }
+  if (!db) { setStatus("bad","Сохраняется только в этом браузере"); return; }
+  docRef = db.doc("tracker/main");
+  const timer = setTimeout(() => setStatus("bad","Не удаётся связаться с хранилищем"), 10000);
+  docRef.onSnapshot(snap => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); setStatus("ok","Сохранено"); }
+    if (snap.metadata.hasPendingWrites) return;
+    if (snap.exists) { state = merge(JSON.parse(JSON.stringify(snap.data()))); saveLocal(); renderAll(); }
+    else if (Object.keys(state.days).length || Object.keys(state.tactics).length) save();
+  }, () => { clearTimeout(timer); setStatus("bad","Хранилище недоступно"); });
+})();
+
+/* ================= РАСЧЁТЫ ================= */
+const active = d => HABITS.filter(h => h.from <= d);
+const rec = d => state.days[d] || (state.days[d] = {h:{},w:false,note:""});
+function dayScore(d){
+  const a = active(d); if (!a.length || d < START) return null;
+  const r = state.days[d]; const done = a.filter(h => r && r.h && r.h[h.id]).length;
+  return {done, total:a.length, pct:done/a.length};
+}
+/* Оценка недели = (ежедневные тактики + недельные тактики) выполнено / запланировано */
+function weekScore(mon){
+  let done=0,total=0,w=0,hd=0,ht=0;
+  for (let i=0;i<7;i++){ const d=addDays(mon,i);
+    if (state.days[d] && state.days[d].w) w++;
+    if (d>TODAY) continue; const s=dayScore(d); if (s){hd+=s.done; ht+=s.total;} }
+  const p = pos(mon); let td=0, tt=0;
+  if (p){ const ts = tacticsFor(p.c,p.w); tt = ts.length; td = ts.filter(isDone).length; }
+  done = hd+td; total = ht+tt;
+  return {pct: (mon>TODAY||!total)? null : done/total, workouts:w, hd, ht, td, tt};
+}
+const workoutsBetween = (a,b) => Object.entries(state.days).filter(([d,r]) => r && r.w && d>=a && d<=b).length;
+const workoutsTotal = () => workoutsBetween("2000-01-01","2100-01-01");
+const enDaysBetween = (a,b) => Object.entries(state.days).filter(([d,r]) => r && r.h && r.h.en && d>=a && d<=b).length;
+const pctTxt = p => p==null ? "—" : Math.round(p*100)+"%";
+const phaseOf = w => PHASES.find(p => w>=p.w[0] && w<=p.w[1]);
+const periodOf = w => PERIODS.find(p => w>=p.w[0] && w<=p.w[1]);
+const cycleEnd = c => addDays(CYCLES[c-1].from, 83);
+
+/* ================= ОТРИСОВКА ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dot = s => `<span class="dot" style="background:${SPHERES[s].c}"></span>`;
+const gBadge = g => `<span class="g-badge ${g==="0"?"g0":""}">${g==="0"?"общее":"Ц"+g}</span>`;
+const tacticRow = t => t.auto
+  ? `<div class="tk" role="checkbox" aria-checked="${isDone(t)}" aria-disabled="true" style="cursor:default"><span class="box"></span>${gBadge(t.g)}<span class="t">${esc(t.t)}</span></div>`
+  : `<div class="tk" role="checkbox" tabindex="0" aria-checked="${isDone(t)}" data-t="${t.id}"><span class="box"></span>${gBadge(t.g)}<span class="t">${esc(t.t)}</span></div>`;
+const scorePill = p => p==null ? "" : p>=.85 ? `<span class="pill good">отличная неделя</span>` : `<span class="pill warn">цель — 85%</span>`;
+
+function renderToday(){
+  const p = pos(sel), r = state.days[sel] || {h:{},w:false,note:""}, sc = dayScore(sel);
+  const mon = mondayOf(sel), ws = weekScore(mon), pm = pos(mon);
+  const ph = p ? phaseOf(p.w) : null;
+  const habits = active(sel).map(h => `
+    <div class="habit" role="checkbox" tabindex="0" aria-checked="${!!(r.h&&r.h[h.id])}" data-h="${h.id}">
+      <span class="box"></span><span class="txt">${esc(h.t)}<br><span class="tag">${SPHERES[h.s].n}</span></span>${dot(h.s)}
+    </div>`).join("");
+  const tacts = pm ? tacticsFor(pm.c, pm.w) : [];
+  const first = parse(sel); first.setDate(1);
+  const offset = (first.getDay()+6)%7, dim = new Date(first.getFullYear(), first.getMonth()+1, 0).getDate();
+  let cells = ["пн","вт","ср","чт","пт","сб","вс"].map(x=>`<div class="hd">${x}</div>`).join("");
+  for (let i=0;i<offset;i++) cells += "<div></div>";
+  for (let d=1; d<=dim; d++){
+    const ds = iso(new Date(first.getFullYear(), first.getMonth(), d)), s = dayScore(ds);
+    let cls = ""; if (ds>TODAY) cls="fut"; else if (s) cls = s.pct>=.85?"l3": s.pct>=.5?"l2": s.pct>0?"l1":"";
+    if (ds===sel) cls+=" sel";
+    const cyc = state.days[ds] && state.days[ds].c;
+    cells += `<button class="${cls}" data-go="${ds}" aria-label="${fmtDate(ds)}${s?', '+pctTxt(s.pct):''}${cyc?', цикл':''}">${d}${cyc?'<span class="cyc"></span>':''}</button>`;
+  }
+  const monthName = first.toLocaleDateString("ru-RU",{month:"long",year:"numeric"});
+  $("tab-today").innerHTML = `
+  <div class="grid two">
+    <div class="card">
+      <div class="daynav">
+        <button class="btn icon" data-shift="-1" aria-label="Предыдущий день">←</button>
+        <span class="date">${fmtDate(sel)}</span>
+        <button class="btn icon" data-shift="1" aria-label="Следующий день">→</button>
+        ${sel!==(TODAY<START?START:TODAY)?`<button class="btn" data-go="${TODAY<START?START:TODAY}">Сегодня</button>`:""}
+      </div>
+      ${TODAY<START && sel===START ? `<div class="banner">Старт — понедельник, 23 ноября. Сегодня можно подготовиться: решить, где ночует телефон, и прочитать вкладку «Видение».</div>`:""}
+      ${p?`<div class="stage"><span class="num">Ц${p.c} · Н${p.w}</span><div><b>Цикл ${p.c} «${CYCLES[p.c-1].title}», неделя ${p.w} из ${p.w===13?13:12}</b><span class="small muted">${periodOf(p.w).n}. Эмоциональный цикл: ${ph.n.toLowerCase()}.</span></div></div>`:""}
+      ${p&&NUDGES[p.w]?`<div class="banner">${NUDGES[p.w]}</div>`:""}
+      ${WMONTHS.includes(TODAY.slice(0,7)) && !wheelFilled(TODAY.slice(0,7)) ? `<div class="banner" style="background:var(--accent-soft)">Пора отметить колесо баланса за ${wmName(TODAY.slice(0,7)).toLowerCase()}. <a href="#vision">Открыть</a></div>`:""}
+      ${sel<START?`<p class="muted">План начинается 23 ноября.</p>`:`
+      <h3 style="margin-bottom:8px">Ежедневные тактики</h3>
+      <div class="list">${habits}</div>
+      <div class="card row-flex" style="padding:12px 14px;margin-top:14px">
+        <div><b>Тренировка</b><br><span class="small muted">Цель: 3 в неделю · на этой неделе ${ws.workouts}/3 · всего ${workoutsTotal()}/150</span></div>
+        <div class="habit" role="checkbox" tabindex="0" aria-checked="${!!r.w}" data-w="1" style="padding:8px 12px"><span class="box"></span><span class="txt">Была</span></div>
+      </div>
+      <div class="row-flex" style="margin-top:10px;justify-content:flex-start">
+        <div class="habit" role="checkbox" tabindex="0" aria-checked="${!!r.c}" data-c="1" style="padding:8px 12px"><span class="box"></span><span class="txt">Первый день цикла</span></div>
+        ${r.c?`<span class="small muted" style="flex:1;min-width:200px">Сегодня нормально работать в режиме минимума, тренировка — мягкая или прогулка.</span>`:""}
+      </div>
+      <label class="lbl" for="note">Заметка дня: что получилось, что помешало</label>
+      <textarea id="note" placeholder="Например: пропустила английский, потому что легла поздно">${esc(r.note||"")}</textarea>`}
+    </div>
+    <div class="stack">
+      <div class="card">
+        <h2>Оценка недели</h2>
+        <div class="kpi"><span class="big">${pctTxt(ws.pct)}</span>${scorePill(ws.pct)}</div>
+        <div class="small muted">Ежедневные: ${ws.hd} из ${ws.ht} · недельные: ${ws.td} из ${ws.tt}. Это опережающий индикатор: если выполняешь 85%+, результаты придут.</div>
+      </div>
+      ${tacts.length?`<div class="card"><h3>Тактики этой недели</h3><div style="margin-top:6px">${tacts.map(tacticRow).join("")}</div></div>`:""}
+      <div class="card">
+        <h3>Минимум на плохой день</h3>
+        <ul class="rules"><li>Подъём по режиму и свет</li><li>5 минут движения</li><li>5 минут английского</li><li>Одно маленькое рабочее действие</li></ul>
+        <p class="small muted" style="margin-top:10px">Один пропуск — это жизнь. Главное — не пропускать дважды подряд.</p>
+      </div>
+      <div class="card">
+        <h3 style="text-transform:capitalize">${monthName}</h3>
+        <div class="heat">${cells}</div>
+        <div class="legend"><span><i class="dot" style="background:var(--low)"></i>начало</span><span><i class="dot" style="background:var(--mid)"></i>50%+</span><span><i class="dot" style="background:var(--good)"></i>85%+</span><span><i class="dot" style="background:var(--s-growth)"></i>цикл</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCycle(){
+  const now = pos(TODAY < START ? START : TODAY) || {c:4,w:13};
+  const c = now.c, C = CYCLES[c-1], end = cycleEnd(c);
+  let weeks85 = 0, sum = 0, n = 0;
+  for (let w=1; w<=12; w++){ const s = weekScore(weekStart(c,w)); if (s.pct!=null){ n++; sum+=s.pct; if (s.pct>=.85) weeks85++; } }
+  const avg = n ? sum/n : null;
+  const lead = c===1 ? {
+    1:`Действия: недель с оценкой 85%+ — <b>${weeks85}</b> из 9 · тренировок — <b>${workoutsBetween(C.from,end)}</b> из 30`,
+    2:`Действия: сообщений клиентам — <b>${state.msgs}</b> из 30 <span class="stepper" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button class="btn icon" data-msg="-1" aria-label="Минус сообщение">−</button><button class="btn icon" data-msg="1" aria-label="Плюс сообщение">+</button></span>`,
+    3:`Действия: дней с английским — <b>${enDaysBetween(C.from,end)}</b> из 84`
+  } : {};
+  const lag = c===1 ? {
+    1:`Результат: анализ сдан — <b>${state.tactics["c1w1-b"]?"да":"нет"}</b>, программа тренировок согласована — <b>${state.tactics["c1w2-a"]?"да":"нет"}</b>`,
+    2:`Результат: проекты — <b>${state.projects}</b> из 2, блог запущен — <b>${state.tactics["c1w2-c"]?"да":"нет"}</b>, портфолио — <b>${state.tactics["c1w3-b"]?"готово":"нет"}</b>`,
+    3:`Результат: 30 минут разговора о работе — <b>${state.tactics["c1w12-c"]?"пройдено":"впереди"}</b>`
+  } : {};
+  const gk = g => `c${c}g${g}`;
+  const goals = C.goals.map(g => { const gs = (state.goals||{})[gk(g.g)] || {};
+    return `<div class="card goalcard" style="border-left-color:${SPHERES[g.s].c}">
+      <span class="g-badge">Цель ${g.g}</span><h2 style="margin-top:8px">${g.t}</h2><p class="small">${g.d}</p>
+      ${lead[g.g]?`<p class="small muted" style="margin-top:10px">${lead[g.g]}</p>`:""}
+      ${lag[g.g]?`<p class="small muted" style="margin-top:4px">${lag[g.g]}</p>`:""}
+      <label class="lbl" for="gw-${g.g}">Почему эта цель важна? Что изменится, если я её достигну?</label>
+      <textarea id="gw-${g.g}" data-goal="${gk(g.g)}" data-gf="why" style="min-height:60px">${esc(gs.why)}</textarea>
+      <label class="lbl" for="gh-${g.g}">Какие действия будут сложными и как я с этим справлюсь?</label>
+      <textarea id="gh-${g.g}" data-goal="${gk(g.g)}" data-gf="hard" style="min-height:60px">${esc(gs.hard)}</textarea></div>`; }).join("");
+  let weeks = "", rows = "";
+  for (let w=1; w<=13; w++){
+    const m = weekStart(c,w), s = weekScore(m), ts = tacticsFor(c,w), isNow = now.c===c && now.w===w;
+    weeks += `<article class="wk ${isNow?'now':''}"><header><h3>${w===13?"Неделя 13":"Неделя "+w}</h3><small>${fmtShort(m)} — ${fmtShort(addDays(m,6))}${s.pct!=null?" · "+pctTxt(s.pct):""}</small></header>${ts.map(tacticRow).join("")}</article>`;
+    if (w<=12) rows += `<div class="srow ${isNow?'cur':''}"><span>Неделя ${w}</span><div class="bar ${s.pct!=null&&s.pct>=.85?'good':''}"><span style="width:${s.pct==null?0:Math.round(s.pct*100)}%"></span></div><span>${pctTxt(s.pct)}</span></div>`;
+  }
+  const curMon = weekStart(now.c, now.w), wk = state.weeks[curMon] || {};
+  const prev = now.w>1 ? weekScore(weekStart(now.c, now.w-1)) : null;
+  const ph = phaseOf(now.w), per = periodOf(now.w);
+  const ta = (id,f,label,ph2) => `<label class="lbl" for="${id}">${label}</label><textarea id="${id}" data-wk="${f}" ${ph2?`placeholder="${ph2}"`:""}>${esc(wk[f])}</textarea>`;
+  const head = `<div class="mw-row mw-head"><span></span>${MODEL_DAYS.map(d=>`<span>${d}</span>`).join("")}</div>`;
+  const mrows = MODEL.map(([t,txt,days]) => `<div class="mw-row"><span class="mw-t">${t}</span>${MODEL_DAYS.map(d=> (days==="*"||days.split(",").includes(d)) ? `<span class="mw-c ${/Стратегич/.test(txt)?'s':/Свободн/.test(txt)?'f':/Буфер/.test(txt)?'b':''}" title="${esc(txt)}">${esc(txt)}</span>` : `<span></span>`).join("")}</div>`).join("");
+  $("tab-cycle").innerHTML = `
+    <div class="row-flex" style="margin-bottom:14px">
+      <div><h2>Цикл ${c} «${C.title}»</h2><span class="small muted">${fmtShort(C.from)} — ${fmtShort(end)} · неделя 13: ${fmtShort(addDays(end,1))} — ${fmtShort(addDays(end,7))}</span></div>
+      <span class="pill neutral">средняя оценка: ${pctTxt(avg)}</span>
+    </div>
+    <div class="grid three-col">${goals}</div>
+    <div class="grid two" style="margin-top:18px">
+      <div class="card">
+        <h2>Еженедельная программа · неделя ${now.w}</h2>
+        <p class="small muted">Каждую неделю, лучше в понедельник утром: 1) оценить прошлую неделю, 2) перенести тактики из плана цикла в план этой недели, 3) встреча подотчётности. Группа из 2–4 человек — например, Иван и подруга — даёт намного больше шансов, чем идти в одиночку. Если группы нет — приходи с отчётом к Claude.</p>
+        <div class="kpi" style="margin-top:12px"><span class="mid-num">${prev?pctTxt(prev.pct):"—"}</span><span class="of">оценка прошлой недели${prev&&prev.pct!=null&&prev.pct<.6?" · ниже 60% — сигнал попросить помощи у группы поддержки":""}</span></div>
+        ${ta("wk-res","res","Результаты на сегодня по целям цикла","Например: портфолио собрано на треть, 4 тренировки за цикл")}
+        ${ta("wk-win","win","Что сработало — мой секрет успеха этой недели")}
+        ${ta("wk-block","block","Что не выполнено и почему: ошибка в плане или в выполнении?","Если оценка ниже 85% — сначала выполнять план, а не менять его")}
+        ${ta("wk-next","next","Обещание на эту неделю и чем мне может помочь группа")}
+      </div>
+      <div class="stack">
+        <div class="card"><h3>${per.n}</h3><p class="small">${per.d}</p></div>
+        <div class="card"><h3>Эмоциональный цикл перемен</h3>
+          <p class="small"><b>${ph.n}.</b> ${ph.d}</p>
+          <div class="phase">${PHASES.slice(0,5).map(x=>`<span class="${x===ph?'on':''}" title="${x.n}"></span>`).join("")}</div>
+          <p class="small muted" style="margin-top:8px">Если сдаться в момент отчаяния, всё начинается заново с оптимизма. Сюда привязаны недели примерно: у каждого цикл идёт по-своему.</p></div>
+        <div class="card"><h3>Действия и результаты</h3>
+          <p class="small">Оценка недели измеряет действия, которые ты контролируешь. Результаты приходят позже. Если результата нет, а оценка 85%+ — меняем план. Если оценка ниже — сначала выполняем план: чаще всего ошибка в выполнении, а не в плане.</p></div>
+        <div class="card"><h3>Оценки недель</h3><div class="grid" style="gap:5px;margin-top:10px">${rows}</div></div>
+      </div>
+    </div>
+    <h2 style="margin:26px 0 6px">Образец недели</h2>
+    <p class="small muted" style="margin:0 0 12px">Черновик. Стратегический блок — в начале недели, в часы твоей лучшей энергии. Сначала ставятся стратегический, буферные и свободный блоки, потом всё остальное. Перенеси их в календарь, как встречи.</p>
+    <div class="card mw">${head}${mrows}</div>
+    <h2 style="margin:26px 0 12px">План цикла по неделям</h2>
+    <p class="small muted" style="margin:-6px 0 12px">План недели — это 1/12 плана цикла. Добавлять новые пункты можно, но редко. ${c>1?"Тактики этого цикла составим вместе в 13-ю неделю предыдущего. ":""}Каждая тактика начинается с глагола и привязана к неделе.</p>
+    <div class="weeks">${weeks}</div>`;
+}
+
+function renderYear(){
+  const now = pos(TODAY < START ? START : TODAY);
+  const cyc = CYCLES.map(C => `<div class="cyc-card ${now&&now.c===C.n?'now':''}"><span class="d">${fmtShort(C.from)} — ${fmtShort(addDays(C.from,90))}</span><b>Цикл ${C.n} · ${C.title}</b><ul>${C.goals.map(g=>`<li>${g.t}</li>`).join("")}</ul></div>`).join("");
+  const curM = TODAY.slice(0,7) < "2026-12" ? "2026-12" : TODAY.slice(0,7);
+  const legend = Object.values(SPHERES).map(s => `<span><i class="dot" style="background:${s.c}"></i>${s.n}</span>`).join("");
+  const months = MONTHS.map(M => { const done = M.m.filter(x => state.done[x[0]]).length;
+    return `<article class="month ${M.k===curM?'now':''}"><header><h3>${M.n}</h3><small>${done}/${M.m.length}</small></header>${M.ev?`<div class="ev">${M.ev}</div>`:""}
+      ${M.m.map(([id,s,t]) => `<div class="tk" role="checkbox" tabindex="0" aria-checked="${!!state.done[id]}" data-ms="${id}"><span class="box"></span><span class="t">${esc(t)}</span>${dot(s)}</div>`).join("")}</article>`; }).join("");
+  const all = MONTHS.flatMap(M=>M.m), doneAll = all.filter(x=>state.done[x[0]]).length;
+  $("tab-year").innerHTML = `
+    <p class="small muted" style="margin:0 0 12px">Год — это четыре «года» по 12 недель. После каждого цикла — неделя 13: отдых, итоги и план следующего.</p>
+    <div class="cycles">${cyc}</div>
+    <div class="row-flex" style="margin-bottom:6px"><h2>Вехи по месяцам</h2><span class="pill neutral">${doneAll} из ${all.length} выполнено</span></div>
+    <div class="legend" style="margin-bottom:14px">${legend}</div>
+    <div class="months">${months}</div>`;
+}
+
+function renderGoals(){
+  const wt = workoutsTotal();
+  const savRows = SAVINGS.map(g => { const v = +state.savings[g.id]||0, p = Math.min(1, v/g.target);
+    return `<div class="row"><span><b>${g.n}</b> <span class="muted small">· ${g.when} · цель ${rub(g.target)}</span></span>
+      <input type="number" min="0" step="1000" value="${v}" data-sav="${g.id}" aria-label="Накоплено на ${g.n}">
+      <div class="bar warm"><span style="width:${Math.round(p*100)}%"></span></div></div>`; }).join("");
+  const savTotal = SAVINGS.reduce((a,g)=>a+(+state.savings[g.id]||0),0);
+  const incRows = Object.keys(INCOME_TARGET).map(k => { const v = +state.income[k]||0, t = INCOME_TARGET[k];
+    return `<div class="inc"><span>${MONTH_SHORT[k]} · ${Math.round(t/1000)}к</span><div class="bar ${v>=t?'good':''}"><span style="width:${Math.min(100,Math.round(v/t*100))}%"></span></div><input type="number" min="0" step="1000" value="${v||""}" placeholder="доход" data-inc="${k}" aria-label="Доход за ${MONTH_SHORT[k]}"></div>`; }).join("");
+  const subsMarks = [[1000,"март"],[3000,"июнь"],[5000,"сентябрь"],[10000,"ноябрь"]].map(([n,m]) => `<span class="pill ${state.subs>=n?'good':'neutral'}">${n.toLocaleString("ru-RU")} · ${m}</span>`).join("");
+  const myAll = MY_GOALS.flatMap(g=>g.items), myDone = myAll.filter(([id])=>(state.myg||{})[id]).length;
+  const myCards = MY_GOALS.map(G => `<div class="card goalcard" style="border-left-color:${SPHERES[G.s].c}"><div class="row-flex"><h2>${G.n}</h2><small class="muted">${G.items.filter(([id])=>(state.myg||{})[id]).length}/${G.items.length}</small></div>
+    <div style="margin-top:6px">${G.items.map(([id,t,where]) => `<div class="tk" role="checkbox" tabindex="0" aria-checked="${!!(state.myg||{})[id]}" data-my="${id}"><span class="box"></span><span class="t">${esc(t)}<br><span class="tag">${esc(where)}</span></span></div>`).join("")}</div></div>`).join("");
+  const netNow = (state.net && state.net[TODAY.slice(0,7)]) || 0;
+  $("tab-goals").innerHTML = `
+  <div class="row-flex" style="margin-bottom:10px"><h2>Мои цели по сферам</h2><span class="pill neutral">${myDone} из ${myAll.length} выполнено</span></div>
+  <p class="small muted" style="margin:0 0 12px">Твои формулировки. Под каждой целью — где она стоит в плане года.</p>
+  <div class="grid goals" style="margin-bottom:28px">${myCards}</div>
+  <h2 style="margin-bottom:6px">Показатели года</h2>
+  <p class="small muted" style="margin:0 0 12px">Индикаторы результата на год. Оценка недели — опережающий индикатор, эти цифры — запаздывающие: они растут, если неделя за неделей выполнены тактики.</p>
+  <div class="grid goals">
+    <div class="card"><h2>Тренировки</h2><div class="kpi"><span class="big">${wt}</span><span class="of">из 150</span></div>
+      <div class="bar good"><span style="width:${Math.min(100,wt/150*100)}%"></span></div>
+      <p class="small muted">Отмечаются на вкладке «Сегодня». Сначала согласовать программу с врачом.</p></div>
+    <div class="card"><h2>Книги</h2><div class="kpi"><span class="big">${state.books}</span><span class="of">из 10</span></div>
+      <div class="stepper"><button class="btn icon" data-step="books" data-d="-1" aria-label="Минус книга">−</button><button class="btn icon" data-step="books" data-d="1" aria-label="Плюс книга">+</button><span class="small muted">≈ одна книга за 5 недель</span></div></div>
+    <div class="card"><h2>Проекты</h2><div class="kpi"><span class="big">${state.projects}</span><span class="of">из 4</span></div>
+      <div class="bar good" style="margin-bottom:10px"><span style="width:${Math.min(100,state.projects/4*100)}%"></span></div>
+      <div class="stepper"><button class="btn icon" data-step="projects" data-d="-1" aria-label="Минус проект">−</button><button class="btn icon" data-step="projects" data-d="1" aria-label="Плюс проект">+</button><span class="small muted">Ступени: 2 к февралю, 3 к июлю, 4 к октябрю</span></div></div>
+    <div class="card"><h2>Знакомства в сфере</h2><div class="kpi"><span class="big">${netNow}</span><span class="of">из 10 в этом месяце</span></div>
+      <div class="stepper"><button class="btn icon" data-net="-1" aria-label="Минус знакомство">−</button><button class="btn icon" data-net="1" aria-label="Плюс знакомство">+</button><span class="small muted">Маркетологи, монтажёры, артисты, бренды</span></div></div>
+    <div class="card"><h2>Instagram</h2><div class="kpi"><span class="big">${(+state.subs||0).toLocaleString("ru-RU")}</span><span class="of">из 10 000</span></div>
+      <input type="number" min="0" step="10" value="${state.subs||0}" data-subs="1" aria-label="Подписчики"><div class="checks">${subsMarks}</div></div>
+    <div class="card" style="grid-column:1 / -1"><h2>Доход по месяцам</h2>
+      <p class="small muted" style="margin:4px 0 10px">Ступени: ~72 тыс. ₽ сейчас → 100 тыс. к маю → 150 тыс. к ноябрю 2027. Впиши фактический доход за месяц.</p>
+      <div class="rows">${incRows}</div></div>
+    <div class="card" style="grid-column:1 / -1"><h2>Накопления</h2>
+      <p class="small muted" style="margin:4px 0 10px">Всего отложено: <b>${rub(savTotal)}</b>. Порядок: камера → поездки → ортодонт → права; квартира — долгая цель. Пока доход около 72 тыс., реально 10–20 тыс. в месяц; 40–50 тыс. — когда доход вырастет.</p>
+      <div class="rows">${savRows}</div></div>
+  </div>`;
+}
+
+/* Колесо баланса по месяцам */
+const WMONTHS = ["2026-11","2026-12","2027-01","2027-02","2027-03","2027-04","2027-05","2027-06","2027-07","2027-08","2027-09","2027-10","2027-11"];
+const wmName = m => { const [y,mo]=m.split("-").map(Number); const t=new Date(y,mo-1,1).toLocaleDateString("ru-RU",{month:"long"}); return t[0].toUpperCase()+t.slice(1)+" "+y; };
+const wmShort = m => { const [y,mo]=m.split("-").map(Number); return new Date(y,mo-1,1).toLocaleDateString("ru-RU",{month:"short"}).replace(".",""); };
+let wheelMonth = WMONTHS.includes(TODAY.slice(0,7)) ? TODAY.slice(0,7) : (TODAY < "2026-11" ? "2026-11" : "2027-11");
+const wheelOf = m => (state.wheelHist||{})[m] || null;
+const wheelFilled = m => { const w = wheelOf(m); return !!(w && Object.keys(w).length); };
+function prevFilled(m){ const i = WMONTHS.indexOf(m); for (let j=i-1;j>=0;j--) if (wheelFilled(WMONTHS[j])) return WMONTHS[j]; return null; }
+function wheelSvg(m){
+  const cx=160, cy=160, R=115, n=WHEEL.length;
+  const pt = (i,v) => { const a = -Math.PI/2 + i*2*Math.PI/n, r = R*v/10; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
+  let rings = ""; [2,4,6,8,10].forEach(v => { rings += `<polygon points="${WHEEL.map((_,i)=>pt(i,v).join(",")).join(" ")}" fill="none" stroke="var(--line)"/>`; });
+  const spokes = WHEEL.map((_,i)=>{ const [x,y]=pt(i,10); return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/>`; }).join("");
+  const cur = wheelOf(m) || {}, pm = prevFilled(m), prev = pm ? wheelOf(pm) : null;
+  const vals = WHEEL.map(([k]) => +cur[k] || 5);
+  const prevPoly = prev ? `<polygon points="${WHEEL.map(([k],i)=>pt(i,+prev[k]||5).join(",")).join(" ")}" fill="none" stroke="var(--warm)" stroke-width="1.5" stroke-dasharray="4 3"/>` : "";
+  const poly = vals.map((v,i)=>pt(i,v).join(",")).join(" ");
+  const labels = WHEEL.map(([k,l],i)=>{ const [x,y]=pt(i,11.9); const anchor = Math.abs(x-cx)<10?"middle": x>cx?"start":"end"; return `<text x="${x}" y="${y}" font-size="10" fill="var(--muted)" text-anchor="${anchor}" dominant-baseline="middle">${l}</text>`; }).join("");
+  return `<svg viewBox="-100 0 520 320" role="img" aria-label="Колесо баланса за ${wmName(m)}">${rings}${spokes}${prevPoly}<polygon points="${poly}" fill="var(--accent)" fill-opacity="${wheelFilled(m)?.22:.08}" stroke="var(--accent)" stroke-width="2" ${wheelFilled(m)?"":'stroke-dasharray="2 3"'}/>${vals.map((v,i)=>{const [x,y]=pt(i,v);return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--accent)"/>`;}).join("")}${labels}</svg>`;
+}
+function wheelHistory(){
+  const months = WMONTHS.filter(wheelFilled);
+  if (!months.length) return `<p class="small muted" style="margin-top:12px">История появится, когда отметишь первый месяц.</p>`;
+  const cell = v => `<span class="wh-c" style="background:color-mix(in srgb, var(--accent) ${Math.round(v*9)}%, var(--surface))${v>=7?';color:#fff':''}">${v}</span>`;
+  const head = `<div class="wh-row" style="grid-template-columns:150px repeat(${months.length},44px)"><span></span>${months.map(m=>`<span class="wh-h">${wmShort(m)}</span>`).join("")}</div>`;
+  const rows = WHEEL.map(([k,l]) => `<div class="wh-row" style="grid-template-columns:150px repeat(${months.length},44px)"><span class="wh-l">${l}</span>${months.map(m=>cell(+(wheelOf(m)[k])||5)).join("")}</div>`).join("");
+  const avg = m => (WHEEL.reduce((a,[k])=>a+(+(wheelOf(m)[k])||5),0)/WHEEL.length).toFixed(1).replace(".",",");
+  const foot = `<div class="wh-row" style="grid-template-columns:150px repeat(${months.length},44px)"><span class="wh-l"><b>Среднее</b></span>${months.map(m=>`<span class="wh-h"><b>${avg(m)}</b></span>`).join("")}</div>`;
+  return `<div class="wh">${head}${rows}${foot}</div>`;
+}
+
+function renderVision(){
+  const cm = state.commit || {}, v = state.vision || {};
+  const vt = (k,label,def,rows) => `<div class="lvl"><b>${label}</b><textarea data-vis="${k}" aria-label="${label}" style="min-height:${rows||70}px;background:var(--surface)">${esc(v[k]!=null?v[k]:def)}</textarea></div>`;
+  const AREAS = [["health","Здоровье и тело","Например: делать 3 тренировки в неделю","Ранний отбой, меньше сериалов вечером"],["work","Карьера и блог","Например: 1 действие по карьере каждый день","Неловкие сообщения незнакомым людям"],["self","Личное: язык, речь, окружение","Например: 40 минут английского каждый день","Меньше времени в соцсетях"]];
+  const rows = AREAS.map(([k,l,phA,phC]) => { const a = (cm.areas||{})[k] || {}; return `
+    <div class="lvl"><b>${l}</b>
+      <label class="lbl" for="cm-${k}-goal" style="margin-top:2px">Моя цель на 12 недель (конкретно, измеримо, в позитивном ключе)</label>
+      <textarea id="cm-${k}-goal" data-ca="${k}" data-cf="goal" style="min-height:50px;background:var(--surface)">${esc(a.goal)}</textarea>
+      <label class="lbl" for="cm-${k}-act">Ключевое действие, которое сильнее всего влияет на цель</label>
+      <textarea id="cm-${k}-act" data-ca="${k}" data-cf="act" placeholder="${phA}" style="min-height:50px;background:var(--surface)">${esc(a.act)}</textarea>
+      <label class="lbl" for="cm-${k}-cost">Цена: чем придётся пожертвовать</label>
+      <textarea id="cm-${k}-cost" data-ca="${k}" data-cf="cost" placeholder="${phC}" style="min-height:50px;background:var(--surface)">${esc(a.cost)}</textarea>
+    </div>`; }).join("");
+  $("tab-vision").innerHTML = `
+  <div class="grid two">
+    <div class="stack">
+      <div class="card"><h2>Видение: три горизонта</h2>
+        <p class="small muted">Видение — эмоциональная причина держать дисциплину, когда не хочется. Мечтай по-крупному: настолько, чтобы было чуть некомфортно. Сначала спрашивай себя «Что если…?», и только потом «Как?». Все поля можно редактировать.</p>
+        <div class="levels">
+          ${vt("long","Долгосрочное видение · через 5, 10 и 15 лет","Жизнь там, где тепло. Красивая квартира с видом из окна. Деньги есть в достатке, и я за них не переживаю. 100 000 подписчиков и сотрудничество с брендами. Статус квалифицированного и талантливого специалиста креативной сферы. Рядом любимые люди и успешное, доброе, честное окружение.",110)}
+          ${vt("three","Три года · к 27 годам (ноябрь 2029)","Доход от 2 500 € в месяц на фрилансе, онлайн. Личный бренд маркетолога и монтажёра. Английский B2, испанский разговорный. Зубы выровнены, права получены, на квартиру копится.",90)}
+          ${vt("one","Один год · ноябрь 2027","Доход 150 тыс. ₽, 4 проекта, 10 000 подписчиков, английский B1–B2, испанский A1–A2, 150 тренировок, 10 книг. Самодостаточная, здоровая, красивая.",80)}
+        </div>
+        <ul class="rules" style="margin-top:12px">
+          <li>Перечитывай видение каждое утро — это первая ежедневная тактика.</li>
+          <li>Расскажи о нём близким: так растёт ответственность за действия.</li>
+          <li>Вечером — пара минут: я сегодня приблизилась к видению или занималась не тем?</li>
+        </ul></div>
+      <div class="card"><h2>Вопросы к видению</h2>
+        <ul class="rules">
+          <li>Почему каждая часть видения так важна для меня?</li>
+          <li>Что я смогу делать, чего не могу сейчас?</li>
+          <li>Что изменится в отношениях с близкими, друзьями, клиентами?</li>
+          <li>Готова ли я полностью посвятить себя этим целям?</li>
+          <li>Кому я рассказала о своём видении? Как часто его перечитываю?</li>
+          <li>Какие риски и препятствия могут возникнуть?</li>
+        </ul></div>
+      <div class="card"><h2>Мой день через год</h2>
+        <ul class="dayline">
+          <li><time>утро</time><span>Просыпаюсь в хорошем настроении и с хорошим самочувствием. Зарядка, вкусный здоровый завтрак, уход за лицом.</span></li>
+          <li><time>день</time><span>Работаю до 5 часов в день над своими проектами.</span></li>
+          <li><time>после</time><span>Английский и испанский. Снимаю контент для блога.</span></li>
+          <li><time>вечер</time><span>Встречаюсь с друзьями, возвращаюсь домой, вечерняя рутина и сон.</span></li>
+        </ul></div>
+      <div class="card"><h2>Колесо баланса · раз в месяц</h2>
+        <p class="small muted">В начале каждого месяца оцени сферы от 1 до 10. Пунктир — прошлая отметка, чтобы видеть движение. Баланс — не равномерность, а осознанный дисбаланс: на каждый цикл выбирай 1–2 главных направления.</p>
+        <div class="row-flex" style="margin-top:10px">
+          <div class="daynav" style="margin:0"><button class="btn icon" data-wm="-1" aria-label="Предыдущий месяц">←</button><span class="date" style="min-width:14ch">${wmName(wheelMonth)}</span><button class="btn icon" data-wm="1" aria-label="Следующий месяц">→</button></div>
+          ${wheelFilled(wheelMonth)?`<span class="pill good">отмечено</span>`:`<span class="pill warn">ещё не отмечено</span>`}
+        </div>
+        <div class="wheel" style="margin-top:10px"><div>${wheelSvg(wheelMonth)}</div>
+          <div class="grid" style="gap:8px">${WHEEL.map(([k,l])=>{ const v = +((wheelOf(wheelMonth)||{})[k])||5; return `<div class="wrow"><label for="wh-${k}">${l}</label><input type="range" min="1" max="10" id="wh-${k}" data-wheel="${k}" value="${v}"><b>${v}</b></div>`; }).join("")}
+          ${wheelFilled(wheelMonth)?"":`<button class="btn" data-wsave="1" style="margin-top:4px">Отметить месяц с этими оценками</button>`}</div></div>
+        <h3 style="margin-top:18px">История по месяцам</h3>
+        ${wheelHistory()}</div>
+    </div>
+    <div class="stack">
+      <div class="card"><h2>Обещания себе на 12 недель</h2>
+        <p class="small muted">Четыре условия: сильное желание, ключевое действие, честно посчитанная цена и готовность делать, не поддаваясь эмоциям. Лучше 1–3 обещания, которые выполнишь, чем десять, которые нарушишь.</p>
+        <div class="levels">${rows}</div>
+        <label class="lbl" for="cm-hidden">Скрытые намерения, которые могут мешать (честно)</label>
+        <textarea id="cm-hidden" data-cm="hidden" placeholder="Например: хочу комфорта и отдыха, боюсь отказа клиентов, не верю, что могу быть другой">${esc(cm.hidden)}</textarea>
+        <label class="lbl" for="cm-who">Кому я расскажу о своих обещаниях</label>
+        <textarea id="cm-who" data-cm="who" style="min-height:44px" placeholder="Например: Ивану и подруге">${esc(cm.who)}</textarea>
+        <div class="habit" role="checkbox" tabindex="0" aria-checked="${!!cm.signed}" data-sign="1" style="margin-top:12px"><span class="box"></span><span class="txt"><b>Подписываю: решение принято, цена посчитана</b>${cm.signed?` · ${esc(cm.signedAt||"")}`:""}</span></div></div>
+      <div class="card"><h2>Три принципа</h2>
+        <ul class="rules">
+          <li><b>Ответственность</b> — это не наказание и не последствия, а свободный выбор и контроль над своими действиями. Не «я должна», а «я выбираю». Главный вопрос: что я могу сделать, чтобы получить результат?</li>
+          <li><b>Обещания.</b> Заинтересованность длится, пока удобно; обещание держится, когда трудно. Обещание себе — это ответственность в будущем времени.</li>
+          <li><b>Величие в моменте.</b> Ты становишься успешной не тогда, когда видишь результат, а в момент, когда выбираешь нужное действие. Результат лишь это подтверждает.</li>
+        </ul></div>
+      <div class="card"><h2>Пять практик</h2>
+        <ul class="rules">
+          <li><b>Видение</b> — зачем.</li>
+          <li><b>Планирование</b> — 1–3 цели и минимум тактик. Хороший план — выполнимый.</li>
+          <li><b>Контроль</b> — план недели, ежедневная сверка с ним и группа поддержки.</li>
+          <li><b>Измерение</b> — оценка недели (действия) и показатели целей (результаты).</li>
+          <li><b>Время</b> — стратегический, буферные и свободный блоки.</li>
+        </ul>
+        <p class="small muted" style="margin-top:8px">Система работает целиком. По кусочкам — тоже работает, но прорыв даёт только вся система.</p></div>
+      <div class="card"><h2>Никакой позиции жертвы</h2>
+        <ul class="rules">
+          <li>Не ищи оправданий: сосредоточься на том, что контролируешь — свои мысли и действия.</li>
+          <li>Не жалей себя дольше, чем нужно: расстроилась — сделай хоть что-то, действие меняет настроение.</li>
+          <li>Хочешь то, чего у тебя нет, — делай то, чего ещё не делала.</li>
+          <li>Окружай себя ответственными людьми.</li>
+          <li>Говорить «нет» нормально: отказ лучше нарушенного обещания.</li>
+          <li>Срыв — не падение: держись за трос и продолжай.</li>
+        </ul></div>
+      <div class="card"><h2>Правила дисциплины</h2>
+        <ul class="rules">
+          <li>В плохой день — минимальная версия. Не пропускать дважды подряд.</li>
+          <li>85% за неделю — отлично; 65–70% — всё равно движение, главное не сходить с дистанции.</li>
+          <li>Не бросай оценивать неделю, даже если две подряд вышли плохими.</li>
+          <li>Вместо сожаления — разбор: что помешало и что поменять.</li>
+          <li>Телефон ночует вне спальни.</li>
+        </ul></div>
+      <div class="card"><h2>Энергия и окружение</h2>
+        <div class="chips">${["создание контента","креатив","развитие","прогресс","упорядоченность","любимые люди рядом","путешествия","вкусная еда","здоровый сон"].map(x=>`<span class="chip">${x}</span>`).join("")}</div>
+        <p class="small" style="margin-top:12px">Окружение: успешные, добрые и честные люди, в которых отражаются качества, которые я в себе воспитываю. 10 новых знакомств в сфере каждый месяц.</p></div>
+    </div>
+  </div>`;
+}
+
+function renderAll(){
+  const ae = document.activeElement, keep = ae && ae.id && (ae.tagName==="TEXTAREA") ? ae.id : null; const keepVis = ae && ae.dataset && ae.dataset.vis;
+  renderToday(); renderCycle(); renderYear(); renderGoals(); renderVision();
+  if (keep){ const t=$(keep); if (t){ t.focus(); t.selectionStart=t.selectionEnd=t.value.length; } }
+  else if (keepVis){ const t=document.querySelector(`[data-vis="${keepVis}"]`); if (t){ t.focus(); t.selectionStart=t.selectionEnd=t.value.length; } }
+}
+
+/* ================= СОБЫТИЯ ================= */
+function toggle(el){
+  const d = el.dataset;
+  if (d.h){ const r=rec(sel); r.h=r.h||{}; r.h[d.h]=!r.h[d.h]; }
+  else if (d.w){ const r=rec(sel); r.w=!r.w; }
+  else if (d.c){ const r=rec(sel); r.c=!r.c; }
+  else if (d.ms){ state.done[d.ms]=!state.done[d.ms]; }
+  else if (d.my){ state.myg=state.myg||{}; state.myg[d.my]=!state.myg[d.my]; }
+  else if (d.t){ state.tactics[d.t]=!state.tactics[d.t]; }
+  else if (d.sign){ state.commit=state.commit||{}; state.commit.signed=!state.commit.signed; state.commit.signedAt = state.commit.signed ? parse(TODAY).toLocaleDateString("ru-RU") : ""; }
+  else return false;
+  save(); renderAll(); return true;
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-h],[data-w],[data-c],[data-ms],[data-t],[data-sign],[data-shift],[data-go],[data-step],[data-net],[data-msg],[data-wm],[data-wsave],[data-my],[data-tab]");
+  if (!t) return;
+  const d = t.dataset;
+  if (d.tab){ location.hash = d.tab; return; }
+  if (d.shift){ sel = addDays(sel, +d.shift); renderToday(); return; }
+  if (d.go){ sel = d.go; renderToday(); return; }
+  if (d.step){ state[d.step]=Math.max(0,(+state[d.step]||0)+(+d.d)); save(); renderAll(); return; }
+  if (d.net){ const k=TODAY.slice(0,7); state.net=state.net||{}; state.net[k]=Math.max(0,(+state.net[k]||0)+(+d.net)); save(); renderAll(); return; }
+  if (d.wm){ const i=WMONTHS.indexOf(wheelMonth)+(+d.wm); if (i>=0&&i<WMONTHS.length){ wheelMonth=WMONTHS[i]; renderVision(); } return; }
+  if (d.wsave){ state.wheelHist=state.wheelHist||{}; const w=(state.wheelHist[wheelMonth]=state.wheelHist[wheelMonth]||{}); WHEEL.forEach(([k])=>{ if (w[k]==null) w[k]=5; }); save(); renderAll(); return; }
+  if (d.msg){ state.msgs=Math.max(0,(+state.msgs||0)+(+d.msg)); save(); renderAll(); return; }
+  toggle(t);
+});
+document.addEventListener("keydown", e => {
+  const el = e.target;
+  if ((e.key===" "||e.key==="Enter") && el.getAttribute && el.getAttribute("role")==="checkbox"){
+    e.preventDefault(); const d = el.dataset;
+    const sel2 = d.h?`[data-h="${d.h}"]`: d.ms?`[data-ms="${d.ms}"]`: d.my?`[data-my="${d.my}"]`: d.t?`[data-t="${d.t}"]`: d.c?"[data-c]": d.sign?"[data-sign]":"[data-w]";
+    const sectionId = el.closest("section") && el.closest("section").id;
+    toggle(el);
+    const again = document.querySelector(`#${sectionId} ${sel2}`); if (again) again.focus();
+  }
+});
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.id==="note"){ rec(sel).note = t.value; save(); }
+  else if (t.dataset.wk){ const now = pos(TODAY<START?START:TODAY) || {c:4,w:13}; const m = weekStart(now.c,now.w); state.weeks[m]=state.weeks[m]||{}; state.weeks[m][t.dataset.wk]=t.value; save(); }
+  else if (t.dataset.cm){ state.commit=state.commit||{}; state.commit[t.dataset.cm]=t.value; save(); }
+  else if (t.dataset.ca){ state.commit=state.commit||{}; const a=(state.commit.areas=state.commit.areas||{}); (a[t.dataset.ca]=a[t.dataset.ca]||{})[t.dataset.cf]=t.value; save(); }
+  else if (t.dataset.goal){ state.goals=state.goals||{}; (state.goals[t.dataset.goal]=state.goals[t.dataset.goal]||{})[t.dataset.gf]=t.value; save(); }
+  else if (t.dataset.vis){ state.vision=state.vision||{}; state.vision[t.dataset.vis]=t.value; save(); }
+  else if (t.dataset.wheel){ state.wheelHist=state.wheelHist||{}; const w=(state.wheelHist[wheelMonth]=state.wheelHist[wheelMonth]||{}); if (!Object.keys(w).length) WHEEL.forEach(([k])=>w[k]=5); w[t.dataset.wheel]=+t.value; t.nextElementSibling.textContent=t.value; save(); }
+});
+document.addEventListener("change", e => {
+  const t=e.target, v=Math.max(0, +t.value||0);
+  if (t.dataset.wheel){ renderVision(); const s=$("wh-"+t.dataset.wheel); if (s) s.focus(); return; }
+  if (t.dataset.sav) state.savings[t.dataset.sav]=v;
+  else if (t.dataset.inc) state.income[t.dataset.inc]=v;
+  else if (t.dataset.subs) state.subs=v;
+  else return;
+  save(); renderAll();
+});
+const TABS = ["today","cycle","year","goals","vision"];
+function route(){
+  const tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "today";
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===tab));
+  TABS.forEach(k => $("tab-"+k).hidden = k!==tab);
+}
+window.addEventListener("hashchange", route);
+renderAll(); route();
+</script>
+</body>
+</html>
